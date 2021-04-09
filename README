@@ -1,0 +1,240 @@
+NUME: Vasilache Raluca
+GRUPA: 314 CA
+
+
+					Tema #1
+
+
+
+	Proiectul contine : 
+   - un fisier README
+   - folderele part1, part2, part3 si part 4 care contin implementarile 
+functiilor cerute 
+
+	Descriere implementare solutii
+
+1. TASK 1
+
+
+ - FUNCTIE : generate_probabilities_system
+
+
+   Se observa ca pentru o diagrma cu rows randuri, matricea A
+va avea un numar de linii egal cu suma lui Gauss:  n = rows*(rows+1)/2;
+Pentru completarea matricei se folosesc doua functii ajutatoare : 
+
+   - nrVecini care returneaza numarul de vecini ai unui element
+din diagrama, acesta urmand sa fie pus pe diagonala principala.
+Numarul de vecini se calculeaza in functie de pozitia elementului in
+diagrama astfel (i - nr liniei, j - nr coloanei): 
+	4 - daca elementul se afla in unul din colturi 
+		(vecinii vor fi doua numere si doi pereti)
+	5 - daca elementul se afla pe una dintre laturi
+		(latura stanga, latura dreapta, sau latura de jos)
+	6 - in celelalte cazuri (elementul va avea o pozitie centrala)
+
+   - index care returneaza elementul din diagrama, calculat pe baza 
+indicilor i si j, folosind formula nr = i * (i-1) / 2 + j; 
+(de exemplu: pe linia 1 coloana 2 in diagrama elementul va avea valoarea 
+1*(1-1)/2 + 2 = 2);
+
+Folosind cele doua functii matricea A se completeaza astfel : 
+ - pe diagonala principala se pune numarul de vecini 
+ - daca elementul nu se afla pe muchia dreapta (i!=j) va avea 
+un vecin in partea stanga pe acelasi nivel si in partea stanga-sus;
+aceste pozitii se completeaza in matrice cu -1;
+ - se repeta rationamentul pentru celelalte cazuri : j!=1, i!=rows
+
+
+  - FUNCTIE : matrix_to_csr
+
+
+    Completarea celor 3 vectori se face parcurgand intreaga matrice.
+Pe masura ce se gasesc elemente nenule se completeaza simultan values,
+cu valoarea nenula gasita in A, si colind cu coloana corespunzatoare valorii.
+Pentru completarea lui rowptr intr-o variabila auxiliara se numara cate
+elemente nenule au fost gasite pe linia tocmai parcursa:
+rowptr(1,i+1) = rowptr(1,i) + x;
+
+
+ - FUNCTIE : Jacobi_factorization
+Algoritmul este cel clasic :
+A = D-L-U
+P = L + U
+G_j = D^-1*P
+c_j = D^-1*b
+
+
+ - FUNCTIE : Jacobi_sparse
+
+
+   Valoarea initiala a solutiei va fi 0. Se calculeaza noul x
+ca G_j*prev_x+c; Daca eroare dintre cele doua iteratii este suficient
+de mica, solutia se poate considera buna si algoritmul se va opri,
+altfel prev_x devine x si se continua algoritmul.
+
+
+2. TASK 2
+
+
+ - FUNCTIE : clustering_pc
+
+
+   Clusterele vor fi memorate ca o matrice unde linia i corespunde 
+cluster-ului i. Pe fiecare linie pe prima pozitia se va afla numarul de
+puncte care apartin cluster-ului i (util pentru calcularea centroizilor),
+iar pe urmatoarele pozitii indecsii punctelor.
+
+    Se distribuie punctele in cele NC clustere asa cum cere enuntul,
+si se calculeaza centroizii corespunzatori fiecarui cluster ca media aritmetica
+a punctelor componente.
+
+    Inainte de fiecare redistribuire a punctelor in clustere, matricea care 
+memoreaza punctele este reinitializata cu 0 pe toate pozitiile.
+
+    Se continua algoritmul calculand distanta de la fiecare punct la fiecare centoid
+ca modului normei dintre cei doi vectori. Punctele sunt atribuite apoi cluster-ului
+corespunzator centroidului fata de care punctul are distanta minima.
+
+    Se calculeaza centroizii obtinuti din noua distributie a punctelor, 
+iar daca diferenta dintre centroids si centroids_next este foarte mica, inseamna
+ca s-a ajuns la stabilitate si algorimul se poate opri.
+Altfel se pastreaza noii centroizi obtinuti si se continua algoritmul.
+
+ 
+ - FUNCTIE : compute_cost_pc
+
+
+   Pentru a determina centroidul caruia fiecare punct ii apartie
+se calculeaza toate distantele de la punct la centroizi (ca modului normei)
+si se alege cea minima, care va fi adaugata la cost.
+
+
+3. TASK 3
+
+
+ - FUNCTIE : rgbHistogram
+
+
+   Se completeaza vectorul sol, folosind primele count_bins pozitii 
+pentru monitorizarea concentratiei de rosu din fieare pixel. Intervalul
+corespunzator pentru fiecare pozitie se calculeaza la fel ca in cerinta.
+Se numara pixelii care apartin intervalului si se adauga in histograma numarul lor. 
+Se repeta numararea pixelilor in acelasi fel si pentru verde si albastru,
+tinand cont ca la calcularea intervalului de valori sa scadem count_bins
+sau 2*count_bins, in functie de portiunea in care ne incadrem.
+
+
+ - FUNCTIE hsvHistogram : 
+
+
+   Pentru conversia imaginilor din rgv in hsv de foloseste algorimul dat in enunt, 
+insa se vectorizeaza astfel incat acesta sa poata fi aplicat simultam tuturor pixelilor,
+obtinand matricile H, S si V. Pentru obtinerea histogramei hsv se aplica acelasi algoritm
+ca la functia precedenta, doar ca pentru matricile H S si V.
+
+
+ - FUNCTIE : SST
+
+
+   Se calculeaza ultimul element din vectorul solutie x, impartind
+valoarea din b la valoarea corespunzatoare din A. Celelalte valori se calculeaza
+incepand cu penultima si pana la prima.
+
+
+ - FUNCTIE : preprocess
+
+
+   Se vor construi doua path-uri : unul catre setul de imagini cu pisici si
+catre setul de date fara pisici, prin concatenarea stringurilor "cats/" sau 
+"not_cats/" la path_to_dataset.
+
+   Se extrag apoi folosind getTmgNames numele tuturor imaginilor din cele doua seturi de date.
+Se initializeaza X de dimensiune egala cu numarul total de imagini, si y care va fi plin de 1,
+urmand ca pe ultimele n2 pozitii sa fie actualizata valoarea la -1 (pentru ca ultimele n2 
+randuri corespund imaginilor fara pisici). Pentru fiecare imagine, in functie de cerinta
+se aplica functia care creeaza histograma rgb sau hsv si se adauga vectorul sol obtinut in
+matricea A, fiecare vector sol reprezentand o linie din matrice.
+
+
+ - FUNCTIE : learn 
+
+
+   Se construieste X_til prin adaugarea Unei coloane de 1 pe ultima pozitie din matricea X.
+X_til este scrisa ca produsul dintre Q - o matrice ortogonala si R - o matrice superior tringhiulara
+aplicand Householder. Se obtine un sistem superior tringhiular care se rezolva usor cu functia SST: 
+	X_til*w = y;
+	Q*R*w = y;
+	R*x = Q'*y;
+ 
+
+ - FUNCTIE : evaluate 
+
+
+   Se construieste X_til ca la pasul precedent. Vectorul out va memora etichetele
+imaginilor evaluate : -1 daca algoritmul stabileste ca imaginea nu are pisica
+si 1 in caz contrar. Este initializat cu 1, iar pe masura ce se calculeaza k  = 
+produsul scalar dintre w' si linia i din X_til, daca k < 0, eticheta y(i) devine -1;
+Percentaje este calculat ca raportul dintre numarul de elemente din y si out care coincid si 
+numarul total de elmente din y.
+   
+   
+4. TASK 4
+
+
+ - FUNCTIE : learn
+
+
+   Se respecta pseudocodul din enunt. Se scaleaza X si pe baza noului X se construieste
+X_til. Pentru calcularea lui w se foloseste preudocodul oferit, in varianta sa vectorizata.
+
+
+ - FUNCTIE : evaluate
+
+
+   Asemanatoare cu functia evaluate de la task3, insa se foloseste matricea X scalata.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
